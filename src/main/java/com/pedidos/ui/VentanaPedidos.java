@@ -65,10 +65,6 @@ public class VentanaPedidos extends JFrame {
 
         JScrollPane scrollPane = new JScrollPane(tablaPedidos);
 
-        // Etiqueta de estado (cuántos pedidos hay)
-        JLabel lblInfo = new JLabel("  Seleccione un pedido para cancelarlo.");
-        lblInfo.setForeground(Color.GRAY);
-
         // Botones
         btnCancelarPedido  = new JButton("Cancelar Pedido");
         btnExportarPedidos = new JButton("Exportar Pedidos");

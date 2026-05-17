@@ -1,6 +1,7 @@
 package com.pedidos.ui;
 
 import com.pedidos.model.Pedido;
+import com.pedidos.model.PedidoValidator;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -186,18 +187,18 @@ public class FormularioPedido extends JFrame {
 
         // --- Validar Nombre del Plato ---
         String nombre = txtNombrePlato.getText().trim();
-        if (nombre.isEmpty()) {
+        if (!PedidoValidator.validarNombre(nombre)) {
             marcarErrorField(txtNombrePlato);
-            errores.append("• El nombre del plato no puede estar vacío.\n");
-            valido = false;
-        } else if (!nombre.matches("[\\p{L}0-9 ]+")) {
-            marcarErrorField(txtNombrePlato);
-            errores.append("• El nombre del plato solo puede contener letras, números y espacios.\n");
+            if (nombre.isEmpty()) {
+                errores.append("• El nombre del plato no puede estar vacío.\n");
+            } else {
+                errores.append("• El nombre del plato solo puede contener letras, números y espacios.\n");
+            }
             valido = false;
         }
 
         // --- Validar Categoría ---
-        if (cmbCategoria.getSelectedIndex() == 0) {
+        if (!PedidoValidator.validarCategoria((String) cmbCategoria.getSelectedItem())) {
             marcarErrorCombo();
             errores.append("• Debe seleccionar una categoría de plato.\n");
             valido = false;
@@ -210,23 +211,17 @@ public class FormularioPedido extends JFrame {
             marcarErrorField(txtCantidad);
             errores.append("• La cantidad de platos no puede estar vacía.\n");
             valido = false;
+        } else if (!PedidoValidator.validarCantidad(cantidadStr)) {
+            marcarErrorField(txtCantidad);
+            errores.append("• La cantidad de platos debe ser un número entero positivo.\n");
+            valido = false;
         } else {
-            try {
-                cantidad = Integer.parseInt(cantidadStr);
-                if (cantidad <= 0) {
-                    marcarErrorField(txtCantidad);
-                    errores.append("• La cantidad de platos debe ser un número entero positivo.\n");
-                    valido = false;
-                }
-            } catch (NumberFormatException ex) {
-                marcarErrorField(txtCantidad);
-                errores.append("• La cantidad de platos debe ser un número entero positivo.\n");
-                valido = false;
-            }
+            cantidad = Integer.parseInt(cantidadStr);
         }
 
         // --- Validar Método de Entrega ---
-        if (!rbDomicilio.isSelected() && !rbRecogida.isSelected()) {
+        String metodo = rbDomicilio.isSelected() ? "Domicilio" : rbRecogida.isSelected() ? "Recogida" : "";
+        if (!PedidoValidator.validarMetodoEntrega(metodo)) {
             marcarErrorPanel();
             errores.append("• Debe seleccionar un método de entrega.\n");
             valido = false;
@@ -236,7 +231,7 @@ public class FormularioPedido extends JFrame {
         String direccion = "";
         if (rbDomicilio.isSelected()) {
             direccion = txtDireccion.getText().trim();
-            if (direccion.isEmpty()) {
+            if (!PedidoValidator.validarDireccion(direccion)) {
                 marcarErrorField(txtDireccion);
                 errores.append("• Debe ingresar una dirección de entrega válida.\n");
                 valido = false;
@@ -251,7 +246,6 @@ public class FormularioPedido extends JFrame {
 
         // --- Crear y registrar el pedido ---
         String categoria = (String) cmbCategoria.getSelectedItem();
-        String metodo    = rbDomicilio.isSelected() ? "Domicilio" : "Recogida";
         Pedido pedido    = new Pedido(nombre, categoria, cantidad, metodo, direccion);
 
         ventanaPedidos.agregarPedido(pedido);
